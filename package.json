@@ -1,0 +1,18 @@
+{
+  "name": "blockbench-norisk-addon",
+  "version": "1.0.0",
+  "description": "Addon für blockbench mit sonstigen utils für das animationssystem vom NoRisk client",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --mode=production",
+    "dev": "webpack --watch --mode=development"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "blockbench-types": "^4.10.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.5.4",
+    "webpack-cli": "^5.1.4"
+  }
+}
