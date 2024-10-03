@@ -4,10 +4,19 @@ import {monkeyPatch, revertPatches} from "./util";
     function loadFileOverride(file: any, animation_filter: string[], originalFunction: Function) {
         let json = file.json || autoParseJSON(file.content);
         let new_anims = originalFunction.call(this, file, animation_filter)
-        console.log(new_anims)
         for(let theJ in json.animations) {
             let theFunny = new_anims.find((it: _Animation) => it.name === theJ)
             theFunny.disableVanillaAnims = json.animations[theJ]["lockVanillaBones"] || {}
+            {
+                let val = json.animations[theJ]["disableOnHit"]
+                if (val != undefined) theFunny.disableOnHit = val
+                else theFunny.disableOnHit = true
+            }
+            {
+                let val = json.animations[theJ]["disableOnMove"]
+                if (val != undefined) theFunny.disableOnMove = val
+                else theFunny.disableOnMove = true
+            }
             console.log(theJ, theFunny)
         }
         return new_anims
@@ -17,6 +26,8 @@ import {monkeyPatch, revertPatches} from "./util";
         let anim = eventData.animation;
         let theJson = eventData.json;
         theJson["lockVanillaBones"] = anim.disableVanillaAnims || {}
+        theJson["disableOnHit"] = anim.disableOnHit
+        theJson["disableOnMove"] = anim.disableOnMove
         console.log("saved")
     }
 
@@ -51,7 +62,7 @@ import {monkeyPatch, revertPatches} from "./util";
             let panel = new Panel({
                 default_side: "right", expand_button: false,
                 id: "nr_bb_frozen_vanilla_bones",
-                    name: "Frozen Vanilla Bones",
+                    name: "NoRisk",
                     icon: "fa-brush",
                     condition: {modes: ["animate"]},
                     default_position: {
@@ -80,6 +91,12 @@ import {monkeyPatch, revertPatches} from "./util";
                                         //@ts-ignore
                                         if (el) el.checked = anim.disableVanillaAnims[allPart.id];
                                     }
+                                    let disableMove = document.getElementById("bb_disable_on_move");
+                                    //@ts-ignore
+                                    if (disableMove) disableMove.checked = anim.disableOnMove
+                                    let disableHit = document.getElementById("bb_disable_on_hit");
+                                    //@ts-ignore
+                                    if (disableHit) disableHit.checked = anim.disableOnHit
                                 } else {
                                     console.log("null")
                                 }
@@ -106,9 +123,16 @@ import {monkeyPatch, revertPatches} from "./util";
                         <div v-for="kk of allParts">
                             <input type="checkbox" :id="'bb_n_check_' + kk.id" v-model="currentAnim.disableVanillaAnims[kk.id]"
                             @change="modifyDirty()">
-                            <label :for="'bb_n_check_' + kk.id">{{kk.name}}</label>
+                            <label :for="'bb_n_check_' + kk.id">Freeze {{kk.name}}</label>
                         </div>
-                        
+                        <div>
+                            <input type="checkbox" :id="'bb_disable_on_hit'" v-model="currentAnim.disableOnHit" @change="modifyDirty()">
+                            <label :for="'bb_disable_on_hit'">Stop animation on hit</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" :id="'bb_disable_on_move'" v-model="currentAnim.disableOnMove" @change="modifyDirty()">
+                            <label :for="'bb_disable_on_move'">Stop animation on move</label>
+                        </div>
                     </div>
                    </div>
                    `
